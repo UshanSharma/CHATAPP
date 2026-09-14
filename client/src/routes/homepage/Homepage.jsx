@@ -39,7 +39,7 @@ const Homepage = () => {
                   2000, ()=>{
                     setTypingStatus("bot")
                   },
-                  'Bot: We produce food for Hamsters',
+                  'Bot: Mice are rodents, so we can produce food for them as well',
                   2000, ()=>{
                     setTypingStatus("Meghna")
                   },
@@ -47,7 +47,7 @@ const Homepage = () => {
                   2000, ()=>{
                      setTypingStatus("bot") 
                   },
-                  'Bot: We produce food for Chinchillas',
+                  'Bot: Guinea Pigs are also rodents, so we can produce food for them as well',
                   2000, () =>{
                     setTypingStatus("Vineet")
                   },
@@ -55,7 +55,7 @@ const Homepage = () => {
                   2000, () =>{
                     setTypingStatus("bot")
                   },
-                  'Bot: We produce food for Gerbils',
+                  'Bot: Rats are also rodents, so we can produce food for them as well',
                   2000, () => {
                     setTypingStatus("Ushan")
                   }
