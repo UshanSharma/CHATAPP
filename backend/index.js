@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
@@ -7,7 +8,7 @@ import mongoose from "mongoose";
 import Chat from "./models/chat.js";
 import UserChats from "./models/userChats.js";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import model from "./lib/gemini.js";
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -38,10 +39,7 @@ app.get("/api/upload", (req, res) => {
   res.send(result);
 });
 
-// ---------------- GOOGLE GENERATIVE AI ----------------
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-
+// ---------------- CHAT (GEMINI) ----------------
 app.post("/api/chat", ClerkExpressRequireAuth(), async (req, res) => {
   const { messages } = req.body;
 
@@ -173,13 +171,12 @@ const startServer = async () => {
       console.log("Server running on port", port);
     });
 
-    // ✅ Handle port already in use gracefully
     server.on("error", (err) => {
       if (err.code === "EADDRINUSE") {
         console.error(
           `❌ Port ${port} is already in use. Kill the process or change the PORT in .env`
         );
-        process.exit(1); // Exit cleanly so nodemon can restart
+        process.exit(1);
       } else {
         console.error("Server error:", err);
         process.exit(1);
@@ -191,7 +188,6 @@ const startServer = async () => {
   }
 };
 
-// ✅ Catch any other unhandled errors
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err.message);
   process.exit(1);
