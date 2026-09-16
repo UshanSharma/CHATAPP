@@ -25,37 +25,28 @@ const NewPrompt = ({ data }) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: () => {
-      return fetch(`${import.meta.env.VITE_API_URL}/api/chat/${data._id}`, {
+    mutationFn: (newAnswer) => {
+      return fetch(`${import.meta.env.VITE_API_URL}/api/chats/${data._id}`, {
         method: "PUT",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: question.length ? question : undefined,
-          answer,
+          answer: newAnswer,
           img: img.dbData?.filePath || undefined,
         }),
       }).then((res) => res.json());
     },
     onSuccess: () => {
-      queryClient
-        .invalidateQueries({ queryKey: ["chat", data._id] })
-        .then(() => {
-          formRef.current.reset();
-          setQuestion("");
-          setAnswer("");
-          setImg({
-            isLoading: false,
-            error: "",
-            dbData: {},
-            aiData: {},
-          });
-        });
+      queryClient.invalidateQueries({ queryKey: ["chat", data._id] }).then(() => {
+        formRef.current?.reset();
+        setQuestion("");
+        setAnswer("");
+        setImg({ isLoading: false, error: "", dbData: {}, aiData: {} });
+      });
     },
     onError: (err) => {
-      console.log(err);
+      console.log("MUTATION ERROR:", err);
     },
   });
 
@@ -67,7 +58,7 @@ const NewPrompt = ({ data }) => {
         role,
         parts: [{ text: parts[0].text }],
       }));
-      
+
       messages.push({ role: "user", parts: [{ text }] });
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
@@ -86,9 +77,13 @@ const NewPrompt = ({ data }) => {
       const result = await response.json();
       setAnswer(result.answer);
 
-      mutation.mutate();
+      // ★★★ FIX: pass result.answer directly into mutate() ★★★
+      // Previously: mutation.mutate() — this read the OLD "answer" state
+      // (still "" at this point, since setAnswer hasn't re-rendered yet),
+      // which is why every saved model message had an empty text field.
+      mutation.mutate(result.answer);
     } catch (err) {
-      console.log(err);
+      console.log("ADD FUNCTION ERROR:", err);
     }
   };
 

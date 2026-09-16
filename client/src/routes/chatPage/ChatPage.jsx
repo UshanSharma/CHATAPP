@@ -9,6 +9,7 @@ import { Fragment } from "react";
 const ChatPage = () => {
   const path = useLocation().pathname;
   const chatId = path.split("/").pop();
+  console.log("ChatPage chatId:", chatId); 
 
   const { isPending, error, data } = useQuery({
     queryKey: ["chat", chatId],

@@ -1,3 +1,6 @@
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -10,7 +13,7 @@ import UserChats from "./models/userChats.js";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 import model from "./lib/gemini.js";
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 const app = express();
 
 // ---------------- FILE PATH ----------------
@@ -112,6 +115,7 @@ app.get("/api/userchats", ClerkExpressRequireAuth(), async (req, res) => {
   const userId = req.auth.userId;
   try {
     const userChats = await UserChats.find({ userId });
+    res.set("Cache-Control", "no-store");   // ADD THIS LINE
     res.status(200).send(userChats[0]?.chats || []);
   } catch (err) {
     console.error(err);
@@ -123,6 +127,7 @@ app.get("/api/chats/:id", ClerkExpressRequireAuth(), async (req, res) => {
   const userId = req.auth.userId;
   try {
     const chat = await Chat.findOne({ _id: req.params.id, userId });
+    res.set("Cache-Control", "no-store");   // ADD THIS LINE
     res.status(200).send(chat);
   } catch (err) {
     console.error(err);
@@ -164,7 +169,9 @@ app.get(/^(?!\/api).*$/, (req, res) => {
 // ---------------- DB + SERVER START ----------------
 const startServer = async () => {
   try {
-    await mongoose.connect(process.env.MONGO);
+    await mongoose.connect(process.env.MONGO, {
+      tlsAllowInvalidCertificates: true,
+    });
     console.log("MongoDB connected");
 
     const server = app.listen(port, () => {
