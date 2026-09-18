@@ -1,0 +1,49 @@
+import { Link } from "react-router-dom";
+import "./chatList.css";
+import { useQuery } from "@tanstack/react-query";
+
+const ChatList = () => {
+  const { isPending, error, data } = useQuery({
+    queryKey: ["userChats"],
+    queryFn: () =>
+      fetch(`${import.meta.env.VITE_API_URL}/api/userchats`, {
+        credentials: "include",
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch chats");
+        }
+        return res.json();
+      }),
+  });
+  return (
+    <div className="chatList">
+      <span className="title">DASHBOARD</span>
+      <Link to="/dashboard">Create a new Chat</Link>
+      <Link to="/">Explore CHAT APP</Link>
+      <Link to="/">Contact</Link>
+      <hr />
+      <span className="title">RECENT CHATS</span>
+      <div className="list">
+        {isPending
+          ? "Loading..."
+          : error
+          ? "Something went wrong!"
+          : data?.map((chat) => (
+              <Link to={`/dashboard/chats/${chat._id}`} key={chat._id}>
+                {chat.title}
+              </Link>
+            ))}
+      </div>
+      <hr />
+      <div className="upgrade">
+        <img src="/logo.png" alt="" />
+        <div className="texts">
+          <span>CHAT APP UPGRADE</span>
+          <span>Coming Soon...</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ChatList;
